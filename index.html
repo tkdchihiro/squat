@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>スクワットのちがい</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#222;--sub:#666;--line:#ddd;--body:#333;--bar:#555;--glute:#e0603a;--quad:#2f7de1;--add:#9a4fd0;--ok:#2a9d6f}
+@media (prefers-color-scheme:dark){:root{--bg:#18191b;--card:#232427;--ink:#eee;--sub:#aaa;--line:#3a3b3f;--body:#ddd;--bar:#bbb}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0 12px}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.grp{display:flex;align-items:center;gap:6px}
+.grp b{font-size:13px;color:var(--sub);font-weight:600;margin-right:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);padding:6px 12px;font-size:14px;cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.play{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px}
+input[type=range]{width:140px}
+.views{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-top:12px}
+.view{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px}
+.view h2{font-size:14px;margin:2px 6px;color:var(--sub);font-weight:600}
+svg{width:100%;height:auto;display:block}
+.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.m{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.m .k{font-size:12px;color:var(--sub)}
+.m .v{font-size:20px;font-weight:700}
+.loadbars{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:12px}
+.lb{display:grid;grid-template-columns:150px 1fr 48px;align-items:center;gap:8px;margin:6px 0;font-size:14px}
+.track{height:14px;background:var(--line);border-radius:7px;overflow:hidden}
+.fill{height:100%;border-radius:7px;transition:width .1s}
+.note{font-size:12px;color:var(--sub);margin-top:4px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card h3{margin:0 0 6px;font-size:16px}
+.card dl{margin:0}
+.card dt{font-size:12px;color:var(--sub);margin-top:8px}
+.card dd{margin:2px 0 0;font-size:14px}
+.both{grid-column:1/-1}
+.calc input{font-size:16px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.res{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--bg);font-size:14px}
+.res:empty{display:none}
+.res button{margin-top:6px}
+[hidden]{display:none!important}
+.filebtn{display:inline-block;font-size:15px;padding:10px 16px}
+.vidwrap{position:relative;max-width:520px;margin-top:10px}
+.vidwrap video{width:100%;display:block;border-radius:8px;background:#000}
+.vidwrap canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.vidctl{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.vt{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.vt th,.vt td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.vt td.n{text-align:right;font-weight:700;white-space:nowrap}
+.vt th{font-size:12px;color:var(--sub);font-weight:600}
+#femur button[data-v=me]{display:none}
+#femur.hasme button[data-v=me]{display:inline-block}
+@media (max-width:700px){.wrap{padding:12px}.cards{grid-template-columns:1fr}.views{gap:6px}.view{padding:4px}.view h2{font-size:11px;margin:2px}.seg button{padding:6px 9px;font-size:13px;white-space:nowrap}.ctrl{gap:8px 12px}.meters{grid-template-columns:repeat(2,1fr)}.lb{grid-template-columns:110px 1fr 40px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>スクワットのちがい（担ぎ方 × 足幅 × 骨格）</h1>
+
+<div class="ctrl">
+  <div class="grp"><b>担ぎ方</b><span class="seg" id="bar"><button data-v="high" class="on">ハイバー</button><button data-v="low">ローバー</button></span></div>
+  <div class="grp"><b>足幅</b><span class="seg" id="stance"><button data-v="narrow" class="on">ナロー</button><button data-v="wide">ワイド</button></span></div>
+  <div class="grp"><b>骨格</b><span class="seg" id="femur"><button data-v="short">太もも短め</button><button data-v="mid" class="on">標準</button><button data-v="long">太もも長め</button><button data-v="me">わたし</button></span></div>
+  <div class="grp"><button class="play" id="play">⏸ 止める</button><input type="range" id="depth" min="0" max="100" value="0" aria-label="しゃがむ深さ"></div>
+</div>
+
+<div class="views">
+  <div class="view"><h2>横から（体の倒れ方・バーの通り道）</h2><svg id="side" viewBox="0 0 380 330"></svg></div>
+  <div class="view"><h2>正面から（足幅・膝の向き）</h2><svg id="front" viewBox="0 0 280 330"></svg></div>
+</div>
+
+<div class="meters">
+  <div class="m"><div class="k">上半身の前傾</div><div class="v" id="mTorso">–</div></div>
+  <div class="m"><div class="k">すねの前傾</div><div class="v" id="mShin">–</div></div>
+  <div class="m"><div class="k">膝の角度</div><div class="v" id="mKnee">–</div></div>
+  <div class="m"><div class="k">股関節の角度</div><div class="v" id="mHip">–</div></div>
+</div>
+
+<div class="loadbars">
+  <div class="lb"><span style="color:var(--glute)">● お尻・もも裏・腰</span><div class="track"><div class="fill" id="bHip" style="background:var(--glute)"></div></div><span id="tHip"></span></div>
+  <div class="lb"><span style="color:var(--quad)">● 太もも前</span><div class="track"><div class="fill" id="bKnee" style="background:var(--quad)"></div></div><span id="tKnee"></span></div>
+  <div class="lb"><span style="color:var(--add)">● 内もも</span><div class="track"><div class="fill" id="bAdd" style="background:var(--add)"></div></div><span id="tAdd"></span></div>
+  <div class="note">上2本は、いちばん下でのバーと股関節・膝の横の距離（てこの長さ）から計算。距離が長いほどその関節まわりの筋肉の負担が大きい。内ももは足幅と深さからの目安。数字は相対値で、どの組み合わせでも全部の筋肉は使う。</div>
+</div>
+
+<div class="cards">
+  <div class="card" id="cardBar"></div>
+  <div class="card" id="cardStance"></div>
+  <div class="card both" id="cardCombo"></div>
+</div>
+
+<h1 style="margin-top:24px">自分の骨格を測る</h1>
+<div class="cards">
+  <div class="card">
+    <h3>① いちばん確実：骨の位置で測る</h3>
+    <dl>
+      <dt>用意するもの</dt><dd>メジャー（なければヒモ＋定規）。2人いると楽</dd>
+      <dt>目印になる骨</dt>
+      <dd><b>股関節の骨</b>：お尻の横、ズボンのポケットのあたり。足を内・外にひねると、ゴリっと動く出っぱり<br>
+          <b>膝の外のすき間</b>：膝を軽く曲げて、膝の外側を指でなぞると見つかる骨と骨のすき間<br>
+          <b>肩の先の骨</b>：肩のいちばん外・上にある平らな骨の角</dd>
+      <dt>測る長さ（立ったまま、体の横で）</dt>
+      <dd><b>太もも</b>＝股関節の骨 → 膝の外のすき間<br>
+          <b>胴</b>＝股関節の骨 → 肩の先の骨</dd>
+      <dt>入力</dt>
+      <dd class="calc">
+        太もも <input id="inFemur" type="number" inputmode="decimal" placeholder="例 41" style="width:70px"> cm
+        胴 <input id="inTorso" type="number" inputmode="decimal" placeholder="例 49" style="width:70px"> cm
+        <div id="outB" class="res"></div>
+      </dd>
+    </dl>
+  </div>
+  <div class="card">
+    <h3>② かんたん：身長と座高で見る</h3>
+    <dl>
+      <dt>測り方</dt>
+      <dd>壁に背中をつけて床にあぐら、またはイスに座る。お尻〜頭のてっぺんの高さ（イスなら座面から）が座高。健康診断の記録があればそれでOK</dd>
+      <dt>入力</dt>
+      <dd class="calc">
+        身長 <input id="inH" type="number" inputmode="decimal" placeholder="例 158" style="width:70px"> cm
+        座高 <input id="inSit" type="number" inputmode="decimal" placeholder="例 85" style="width:70px"> cm
+        <div id="outA" class="res"></div>
+      </dd>
+      <dt>注意</dt>
+      <dd>脚の長さは「太もも＋すね」の合計なので、太ももだけが長いのかまでは分からない。目安として使い、迷ったら①で測る</dd>
+    </dl>
+  </div>
+  <div class="card both">
+    <h3>③ 骨格より大事なこともある：やわらかさのチェック</h3>
+    <dl>
+      <dt>足首（ハイバー・ナロー向きかどうか）</dt>
+      <dd><b>壁ひざタッチ</b>：壁に向かって立ち、つま先を壁から離す。かかとを床につけたまま膝を壁につける。<br>
+      つま先〜壁が <b>10cm以上</b>で膝がつく → 足首はやわらかい（ハイバー・ナローでも深くしゃがみやすい）／<b>8cm未満</b> → 硬め（ローバー・ワイド、かかとの高い靴が楽）</dd>
+      <dt>股関節（ワイド向きかどうか）</dt>
+      <dd><b>足幅を変えて、何も持たずにしゃがむ</b>：肩幅／こぶし1つ広く／こぶし2つ広く、つま先の開きも変えて試す。<br>
+      いちばん深くまで腰が丸まらずにしゃがめて、詰まる感じがない幅が、その人の骨盤の形に合った足幅（ここは骨の形の個人差が大きく、測るより試すのが確実）</dd>
+      <dt>肩（ローバーができるかどうか）</dt>
+      <dd>何も持たずにバーを担ぐ形を作る。ひじを後ろに引いて、肩や手首が痛くなく低い位置で握れるならローバーもできる</dd>
+    </dl>
+  </div>
+</div>
+
+<h1 style="margin-top:24px">動画から自動で測る</h1>
+<div class="card">
+  <dl>
+    <dt>撮り方</dt>
+    <dd><b>真横から</b>・頭から足先まで全部入る距離・カメラは腰の高さで<b>固定</b>（立てかけてOK）。<br>
+    最初に<b>1秒以上まっすぐ立つ</b> → <b>3〜5回</b>しゃがむ。体にぴったりした服がよい。プレートで脚が隠れるなら、バーだけか何も持たずに。</dd>
+    <dt>しくみ</dt>
+    <dd>蹴り分析・撮影チェックと同じ骨格の読み取り（MediaPipe）を、<b>このスマホ・PCの中だけ</b>で動かす。動画はどこにも送らない（ネットを使うのは最初の読み取り用データのダウンロードだけ）。</dd>
+  </dl>
+  <p><label class="play filebtn">🎥 動画を選ぶ・撮る<input type="file" id="vidFile" accept="video/*" hidden></label></p>
+  <div id="vidStatus" class="res"></div>
+  <div class="vidwrap" id="vidWrap" hidden><video id="vid" playsinline muted preload="auto"></video><canvas id="vidCv"></canvas></div>
+  <div id="vidCtl" class="vidctl" hidden><button class="play" id="vidPlay">▶ 骨格つきで再生</button><button class="play" id="vidBottom">一番下のコマを見る</button></div>
+  <div id="vidRes"></div>
+</div>
+</div>
+
+<script>
+const S={bar:'high',stance:'narrow',femur:'mid',t:0,playing:true};
+const D2R=Math.PI/180, R2D=180/Math.PI;
+const FEM={short:0.86,mid:1,long:1.15,me:1};
+
+function pose(t){
+  const L1=88, L3=108;
+  const fem=FEM[S.femur];
+  const proj=S.stance==='wide'?0.86:1;           // 横から見ると、外に開いた太ももは短く見える
+  const L2=92*fem*proj;
+  let smax=(S.bar==='high'?36:29)+(S.stance==='wide'?-8:3)+(fem-1)*25;
+  const e=t; // 深さ 0..1
+  const s=smax*e*D2R;
+  const phi=102*e*D2R;
+  const knee={x:Math.sin(s)*L1,y:Math.cos(s)*L1};
+  const hip={x:knee.x-Math.sin(phi)*L2,y:knee.y+Math.cos(phi)*L2};
+  const d=S.bar==='high'?L3:L3-15, o=S.bar==='high'?7:11;
+  const mid=6;
+  const barAt=a=>({x:hip.x+Math.sin(a)*d-Math.cos(a)*o,y:hip.y+Math.cos(a)*d+Math.sin(a)*o});
+  let lo=-15*D2R,hi=88*D2R;
+  for(let i=0;i<40;i++){const m=(lo+hi)/2; if(barAt(m).x<mid) lo=m; else hi=m;}
+  const a=(lo+hi)/2;
+  const bar=barAt(a);
+  const sh={x:hip.x+Math.sin(a)*L3,y:hip.y+Math.cos(a)*L3};
+  const head={x:hip.x+Math.sin(a)*(L3+22),y:hip.y+Math.cos(a)*(L3+22)};
+  const ang=(p,q,r)=>{const v1={x:q.x-p.x,y:q.y-p.y},v2={x:r.x-p.x,y:r.y-p.y};return Math.acos((v1.x*v2.x+v1.y*v2.y)/Math.hypot(v1.x,v1.y)/Math.hypot(v2.x,v2.y))*R2D};
+  return {knee,hip,bar,sh,head,a,s,mid,
+    kneeAng:ang(knee,{x:0,y:0},hip), hipAng:ang(hip,knee,sh),
+    hipArm:Math.max(0,bar.x-hip.x), kneeArm:Math.max(0,knee.x-bar.x)};
+}
+
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent.appendChild(e);return e}
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+function drawSide(p){
+  const g=document.getElementById('side'); g.innerHTML='';
+  const ox=210, gy=300, ah=10;
+  const K=0.78, X=x=>ox+x*K, Y=y=>gy-ah-y*K;
+  const body=css('--body'), line=css('--line');
+  el('line',{x1:20,y1:gy,x2:360,y2:gy,stroke:line,'stroke-width':2},g);
+  el('line',{x1:X(p.mid),y1:30,x2:X(p.mid),y2:gy,stroke:css('--ok'),'stroke-width':1.5,'stroke-dasharray':'5 5'},g);
+  el('text',{x:X(p.mid)+6,y:gy+18,fill:css('--ok'),'font-size':11},g).textContent='足の真ん中（バーはこの線の上を上下する）';
+  // 足
+  el('line',{x1:X(-22),y1:gy-2,x2:X(42),y2:gy-2,stroke:body,'stroke-width':6,'stroke-linecap':'round'},g);
+  el('line',{x1:X(0),y1:gy-2,x2:X(0),y2:Y(0),stroke:body,'stroke-width':6},g);
+  // てこの長さ（横線）
+  const by=Y(p.bar.y);
+  el('line',{x1:X(p.hip.x),y1:Y(p.hip.y),x2:X(p.bar.x),y2:Y(p.hip.y),stroke:css('--glute'),'stroke-width':3,opacity:.7},g);
+  el('line',{x1:X(p.knee.x),y1:Y(p.knee.y),x2:X(p.bar.x),y2:Y(p.knee.y),stroke:css('--quad'),'stroke-width':3,opacity:.7},g);
+  // 体
+  const seg=(a,b,w,c)=>el('line',{x1:X(a.x),y1:Y(a.y),x2:X(b.x),y2:Y(b.y),stroke:c||body,'stroke-width':w,'stroke-linecap':'round'},g);
+  seg({x:0,y:0},p.knee,10);
+  seg(p.knee,p.hip,13);
+  seg(p.hip,p.sh,14);
+  // 腕
+  const elbow={x:p.sh.x-14,y:p.sh.y-26};
+  seg(p.sh,elbow,6); seg(elbow,p.bar,6);
+  el('circle',{cx:X(p.head.x),cy:Y(p.head.y),r:14,fill:body},g);
+  // 筋肉の強調
+  const hr=Math.min(1,p.hipArm/90), kr=Math.min(1,p.kneeArm/90);
+  el('circle',{cx:X(p.hip.x-4),cy:Y(p.hip.y),r:8+12*hr,fill:css('--glute'),opacity:.25+.55*hr},g);
+  const mx=(p.knee.x+p.hip.x)/2, my=(p.knee.y+p.hip.y)/2;
+  el('ellipse',{cx:X(mx+(p.t>0?3:3)),cy:Y(my+4),rx:6+8*kr,ry:5+5*kr,fill:css('--quad'),opacity:.25+.55*kr,transform:`rotate(${-Math.atan2(p.hip.y-p.knee.y,p.hip.x-p.knee.x)*R2D} ${X(mx)} ${Y(my+4)})`},g);
+  // バー（プレート）
+  el('circle',{cx:X(p.bar.x),cy:by,r:24,fill:'none',stroke:css('--bar'),'stroke-width':6},g);
+  el('circle',{cx:X(p.bar.x),cy:by,r:4,fill:css('--bar')},g);
+}
+
+function drawFront(p){
+  const g=document.getElementById('front'); g.innerHTML='';
+  const cx=140, gy=300, ah=10;
+  const K=0.78, Y=y=>gy-ah-y*K;
+  const body=css('--body');
+  el('line',{x1:10,y1:gy,x2:270,y2:gy,stroke:css('--line'),'stroke-width':2},g);
+  const wide=S.stance==='wide';
+  const fw=wide?52:26, toe=wide?35:15, hw=17;
+  const t=S.t;
+  for(const sg of [-1,1]){
+    const fx=cx+sg*fw;
+    // 足（つま先の向き）
+    const tl=26;
+    el('line',{x1:fx,y1:gy-3,x2:fx+sg*Math.sin(toe*D2R)*tl,y2:gy-3+Math.cos(toe*D2R)*0-1,stroke:body,'stroke-width':7,'stroke-linecap':'round'},g);
+    const kx=cx+sg*(fw+ (wide?10:5)*t + (wide?2:0)), ky=Y(p.knee.y*(1-0.0*t));
+    const hx=cx+sg*hw, hy=Y(p.hip.y);
+    // 内もも（内転筋）
+    const ar=Math.min(1,(wide?0.75:0.3)*t+ (wide?0.15:0.05));
+    el('polygon',{points:`${hx},${hy} ${kx},${ky} ${cx+sg*2},${hy+6}`,fill:css('--add'),opacity:(0.15+0.6*ar)*Math.min(1,t*2+0.2)},g);
+    el('line',{x1:fx,y1:Y(0),x2:kx,y2:ky,stroke:body,'stroke-width':10,'stroke-linecap':'round'},g);
+    el('line',{x1:kx,y1:ky,x2:hx,y2:hy,stroke:body,'stroke-width':13,'stroke-linecap':'round'},g);
+    // つま先方向の補助線
+    el('line',{x1:fx,y1:gy-3,x2:fx+sg*Math.sin(toe*D2R)*120,y2:gy-3-Math.cos(toe*D2R)*120,stroke:css('--ok'),'stroke-width':1,'stroke-dasharray':'3 4',opacity:.6},g);
+  }
+  const hy=Y(p.hip.y), shy=Y(p.hip.y+Math.cos(p.a)*108), heady=Y(p.hip.y+Math.cos(p.a)*130);
+  el('line',{x1:cx-hw,y1:hy,x2:cx+hw,y2:hy,stroke:body,'stroke-width':12,'stroke-linecap':'round'},g);
+  el('line',{x1:cx,y1:hy,x2:cx,y2:shy,stroke:body,'stroke-width':26,'stroke-linecap':'round'},g);
+  el('line',{x1:cx-30,y1:shy,x2:cx+30,y2:shy,stroke:body,'stroke-width':12,'stroke-linecap':'round'},g);
+  el('circle',{cx:cx,cy:heady,r:14,fill:body},g);
+  const by=Y(p.bar.y);
+  const grip=S.bar==='low'?38:46;
+  for(const sg of [-1,1]){
+    el('line',{x1:cx+sg*30,y1:shy,x2:cx+sg*grip,y2:shy+22,stroke:body,'stroke-width':6,'stroke-linecap':'round'},g);
+    el('line',{x1:cx+sg*grip,y1:shy+22,x2:cx+sg*grip,y2:by,stroke:body,'stroke-width':6,'stroke-linecap':'round'},g);
+  }
+  el('line',{x1:cx-125,y1:by,x2:cx+125,y2:by,stroke:css('--bar'),'stroke-width':4},g);
+  for(const sg of [-1,1]) el('rect',{x:cx+sg*105-(sg>0?0:12),y:by-24,width:12,height:48,rx:2,fill:css('--bar')},g);
+}
+
+const TXT={
+ high:{t:'ハイバー（首の付け根の上・僧帽筋の上に乗せる）',
+   m:'太もも前（大腿四頭筋）が主役。膝が前に出て、上半身は立ち気味。',
+   b:'胴が長め・太ももが短め。足首がよく曲がる（すねを前に倒せる）人。肩が硬くても担げる。',
+   c:'足首が硬いとかかとが浮く・前に倒れやすい。ウエイトリフティング（クリーン・スナッチ）の土台に近い動き。'},
+ low:{t:'ローバー（肩甲骨のでっぱりの下・後ろ肩の上に乗せる）',
+   m:'お尻（大殿筋）・もも裏・背中の筋肉の出番が増える。お尻を後ろに引き、上半身は前に倒れる。',
+   b:'太ももが長め・胴が短め。足首が硬い人。腰を後ろに引く動きが得意な人。',
+   c:'肩と手首の柔らかさが必要（バーを低く持つため）。前傾が深いので腰を丸めないこと。パワーリフティングで重さを扱いやすい。'},
+ narrow:{t:'ナロー（肩幅くらい・つま先はやや外）',
+   m:'太もも前が中心。内ももの関与は少なめ。',
+   b:'太ももが短め。足首がよく曲がる。股関節の受け皿が前向きで、足を閉じても深くしゃがめる人。',
+   c:'深くしゃがむほど膝が前に出て、すねが倒れる。足首が硬いと深さが取れない。'},
+ wide:{t:'ワイド（肩幅より広く・つま先を大きめに外へ）',
+   m:'お尻と内もも（大内転筋）の出番が増える。太もも前は大きくは変わらない。',
+   b:'太ももが長め。股関節を外に開くのが得意（あぐらが楽な人）。骨盤の受け皿が横向きの人。',
+   c:'膝はつま先と同じ方向へ。内側に入ると膝を痛めやすい。股関節が硬いと深さが取れない。'}
+};
+function combo(){
+  const k=S.bar+'-'+S.stance;
+  return {
+   'high-narrow':['最も「膝」寄りのスクワット','すねも上半身も立てて、太もも前を集中して使う。太ももが長い人はかなり前に倒れるので苦しくなりやすい。'],
+   'high-wide':['ハイバーだけど脚は開く','上半身は立てたまま、お尻と内ももも使う。足首が硬くて深さが出ない人の逃げ道にもなる。'],
+   'low-narrow':['前傾が深い・やや珍しい組み合わせ','お尻・もも裏・背中に寄る。足首が硬い人には楽だが、上半身がかなり倒れて腰への負担が増えやすい。'],
+   'low-wide':['最も「股関節」寄りのスクワット（パワーリフティング型）','お尻・もも裏・内ももを総動員し、いちばん重さを扱いやすい。すねは立ち、膝はあまり前に出ない。']
+  }[k];
+}
+function cards(){
+  const c=(o)=>`<h3>${o.t}</h3><dl><dt>主に使う筋肉</dt><dd>${o.m}</dd><dt>やりやすい骨格・体</dt><dd>${o.b}</dd><dt>気をつけること</dt><dd>${o.c}</dd></dl>`;
+  document.getElementById('cardBar').innerHTML=c(TXT[S.bar]);
+  document.getElementById('cardStance').innerHTML=c(TXT[S.stance]);
+  const [h,b]=combo();
+  const fem={short:'太もも短め：どの組み合わせでも上半身を立てやすい。',mid:'標準：骨格を「太もも長め/短め」に変えると、上半身の倒れ方がどう変わるか見られる。',long:'太もも長め：お尻が後ろに大きく出て、上半身が倒れやすい。ローバー・ワイドの方が楽に感じやすい。',
+    me:`わたし（太もも÷胴＝${ME.ratio?ME.ratio.toFixed(2):'–'}）：測った長さで動かしています。`}[S.femur];
+  document.getElementById('cardCombo').innerHTML=`<h3>この組み合わせ：${h}</h3><dl><dd>${b}</dd><dt>骨格の影響</dt><dd>${fem}</dd><dt>補足</dt><dd>ちがいは「どちらに寄るか」の程度の話で、どれも全身を使う。最終的には実際にやってみて、深さ・痛み・重さの扱いやすさで選ぶのが確実。</dd></dl>`;
+}
+
+function update(){
+  const p=pose(S.t); p.t=S.t;
+  drawSide(p); drawFront(p);
+  document.getElementById('mTorso').textContent=Math.round(p.a*R2D)+'°';
+  document.getElementById('mShin').textContent=Math.round(p.s*R2D)+'°';
+  document.getElementById('mKnee').textContent=Math.round(p.kneeAng)+'°';
+  document.getElementById('mHip').textContent=Math.round(p.hipAng)+'°';
+  const b=pose(1);
+  const tot=b.hipArm+b.kneeArm;
+  const hp=b.hipArm/tot*100, kp=b.kneeArm/tot*100;
+  const ad=(S.stance==='wide'?70:30)+(S.bar==='low'?5:0);
+  document.getElementById('bHip').style.width=hp+'%';
+  document.getElementById('bKnee').style.width=kp+'%';
+  document.getElementById('bAdd').style.width=ad+'%';
+  document.getElementById('tHip').textContent=Math.round(hp);
+  document.getElementById('tKnee').textContent=Math.round(kp);
+  document.getElementById('tAdd').textContent=ad;
+}
+
+for(const id of ['bar','stance','femur']){
+  document.getElementById(id).addEventListener('click',e=>{
+    const v=e.target.dataset.v; if(!v)return;
+    S[id]=v;
+    for(const btn of document.querySelectorAll('#'+id+' button')) btn.classList.toggle('on',btn.dataset.v===v);
+    cards(); update();
+  });
+}
+const playBtn=document.getElementById('play'), rng=document.getElementById('depth');
+playBtn.onclick=()=>{S.playing=!S.playing;playBtn.textContent=S.playing?'⏸ 止める':'▶ 動かす'};
+rng.oninput=()=>{S.playing=false;playBtn.textContent='▶ 動かす';S.t=rng.value/100;update()};
+let t0=null;
+function loop(ts){
+  if(t0===null)t0=ts;
+  if(S.playing){
+    const ph=((ts-t0)/3200)%1;              // 1往復3.2秒
+    S.t=(1-Math.cos(ph*2*Math.PI))/2;
+    rng.value=Math.round(S.t*100);
+    update();
+  }
+  requestAnimationFrame(loop);
+}
+// ---- 自分の骨格 ----
+const ME={ratio:null};
+const MODEL_RATIO=92/108; // アニメの「標準」の太もも÷胴
+function setFemur(v){
+  S.femur=v;
+  for(const btn of document.querySelectorAll('#femur button')) btn.classList.toggle('on',btn.dataset.v===v);
+  cards(); update();
+}
+const num=id=>{const v=parseFloat(document.getElementById(id).value);return isFinite(v)&&v>0?v:null};
+function calcB(){
+  const f=num('inFemur'), t=num('inTorso'), out=document.getElementById('outB');
+  if(!f||!t){out.innerHTML='';return}
+  const r=f/t;
+  let kind,adv;
+  if(r>=0.88){kind='<b>太もも長め</b>';adv='ローバー・ワイド寄りが楽に感じやすい。ハイバー・ナローだと上半身がかなり倒れる'}
+  else if(r<=0.78){kind='<b>太もも短め</b>';adv='ハイバー・ナローでも上半身を立てたまま深くしゃがみやすい。どの型も選びやすい'}
+  else {kind='<b>標準くらい</b>';adv='骨格での向き不向きは小さい。足首・股関節のやわらかさ（③）で選ぶとよい'}
+  out.innerHTML=`太もも÷胴＝<b>${r.toFixed(2)}</b>（目安：0.78以下＝短め／0.83前後＝標準／0.88以上＝長め）<br>→ ${kind}。${adv}<br><button class="play" id="applyMe">この骨格でアニメを動かす</button>`;
+  document.getElementById('applyMe').onclick=()=>applyRatio(r);
+}
+function applyRatio(r){
+  ME.ratio=r; FEM.me=Math.min(1.35,Math.max(0.75,r/MODEL_RATIO));
+  document.getElementById('femur').classList.add('hasme');
+  setFemur('me'); window.scrollTo({top:0,behavior:'smooth'});
+}
+function ratioKind(r){
+  return r>=0.88?'太もも長め':r<=0.78?'太もも短め':'標準くらい';
+}
+function calcA(){
+  const h=num('inH'), s=num('inSit'), out=document.getElementById('outA');
+  if(!h||!s){out.innerHTML='';return}
+  const r=s/h;
+  let kind;
+  if(r>=0.545) kind='<b>胴が長め（脚が短め）</b>：上半身を立てやすい側。ハイバーも合いやすい';
+  else if(r<=0.525) kind='<b>胴が短め（脚が長め）</b>：上半身が倒れやすい側。ローバー・ワイドが楽なことが多い';
+  else kind='<b>標準くらい</b>';
+  out.innerHTML=`座高÷身長＝<b>${r.toFixed(3)}</b>（日本人の大人はだいたい0.53〜0.54）<br>→ ${kind}`;
+}
+for(const id of ['inFemur','inTorso','inH','inSit']){
+  const e=document.getElementById(id);
+  try{const v=localStorage.getItem('squat_'+id); if(v) e.value=v;}catch(_){}
+  e.addEventListener('input',()=>{try{localStorage.setItem('squat_'+id,e.value)}catch(_){} calcA();calcB();});
+}
+calcA(); calcB();
+
+// ---- 動画から骨格を読む（撮影チェックと同じ MediaPipe。端末の中だけで処理） ----
+const MP_URL='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
+let LM=null, tsc=0;
+const nextTs=ms=>(tsc+=Math.max(1,Math.round(ms)));
+async function getLM(){
+  if(LM) return LM;
+  const v=await import(MP_URL);
+  const fs=await v.FilesetResolver.forVisionTasks(MP_URL+'/wasm');
+  const mk=d=>v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:MODEL,delegate:d},runningMode:'VIDEO',numPoses:1,
+    minPoseDetectionConfidence:.4,minPosePresenceConfidence:.4,minTrackingConfidence:.4});
+  try{LM=await mk('GPU')}catch(e){console.warn('GPU不可→CPU',e);LM=await mk('CPU')}
+  return LM;
+}
+const vid=document.getElementById('vid'), cv=document.getElementById('vidCv'), vst=document.getElementById('vidStatus');
+const medA=a=>{const b=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!b.length)return NaN;const m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const pctA=(a,q)=>{const b=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!b.length)return NaN;return b[Math.min(b.length-1,Math.max(0,Math.round(q*(b.length-1))))]};
+const waitEv=(el,ev)=>new Promise(r=>el.addEventListener(ev,r,{once:true}));
+async function seekTo(t){if(Math.abs(vid.currentTime-t)<1e-4)return;const p=waitEv(vid,'seeked');vid.currentTime=t;await p}
+let VF=[], VA=null;
+
+async function scan(lm,onP){
+  const frames=[], dur=vid.duration;
+  const grab=(t,step)=>{const r=lm.detectForVideo(vid,nextTs(step));const L=r.landmarks&&r.landmarks[0];frames.push({t,p:L?L.map(q=>[q.x,q.y,q.visibility??1]):null})};
+  await seekTo(0);
+  lm.detectForVideo(vid,nextTs(33));   // 準備運転（1回目は遅いので、再生前に済ませる）
+  if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
+    vid.playbackRate=0.5;
+    await new Promise(res=>{
+      let last=-1;
+      const cb=(now,meta)=>{const t=meta.mediaTime;if(t>last){grab(t,last<0?33:(t-last)*1000);last=t;onP(t/dur)}if(!vid.ended)vid.requestVideoFrameCallback(cb)};
+      vid.requestVideoFrameCallback(cb); vid.onended=res; vid.play();
+    });
+    vid.onended=null; vid.playbackRate=1;
+  }
+  if(frames.length<dur*8){            // コマを取りこぼした（遅い端末・古いブラウザ）→ 1/15秒ずつ止めて調べる
+    frames.length=0;
+    for(let t=0;t<dur;t+=1/15){await seekTo(t);grab(t,67);onP(t/dur)}
+  }
+  return frames;
+}
+
+// 骨格の点 → 指標
+function analyzeFrames(frames,vw,vh){
+  const F=frames.filter(f=>f.p);
+  if(F.length<15) return {err:'体が見つかりませんでした。全身が入っているか、明るさを確認してください。'};
+  const vis=(f,ids)=>ids.reduce((s,i)=>s+f.p[i][2],0);
+  let Lv=0,Rv=0; for(const f of F){Lv+=vis(f,[11,23,25,27]);Rv+=vis(f,[12,24,26,28])}
+  const side=Lv>=Rv?{sh:11,hip:23,kn:25,an:27,he:29,to:31}:{sh:12,hip:24,kn:26,an:28,he:30,to:32};
+  const P=(f,k)=>({x:f.p[side[k]][0]*vw,y:f.p[side[k]][1]*vh});
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const dir=Math.sign(medA(F.map(f=>P(f,'to').x-P(f,'he').x)))||1;   // つま先の向き＝前
+  const raw=F.map(f=>P(f,'hip').y);
+  const sm=raw.map((_,i)=>medA(raw.slice(Math.max(0,i-2),i+3)));
+  const thigh=medA(F.map(f=>dist(P(f,'hip'),P(f,'kn'))));
+  const top=pctA(sm,0.05), bot=pctA(sm,0.98);
+  if(!(bot-top>thigh*0.35)) return {err:'しゃがむ動きが見つかりませんでした。真横から、立った状態としゃがんだ状態が両方映っているか確認してください。'};
+  const thr=top+0.6*(bot-top), standThr=top+0.12*(bot-top);
+  const reps=[]; let inRep=false,best=-1;
+  sm.forEach((y,i)=>{if(y>thr){if(!inRep){inRep=true;best=i}else if(y>sm[best])best=i}else if(inRep){inRep=false;reps.push(best)}});
+  if(inRep) reps.push(best);
+  const stand=F.filter((f,i)=>sm[i]<standThr);
+  const ratio=medA(stand.map(f=>dist(P(f,'hip'),P(f,'kn'))/dist(P(f,'hip'),P(f,'sh'))));
+  const lean=(a,b)=>Math.atan2(dir*(b.x-a.x),a.y-b.y)*R2D;           // a→b の、真上からの前への傾き
+  const ang=(o,a,b)=>{const u={x:a.x-o.x,y:a.y-o.y},v={x:b.x-o.x,y:b.y-o.y};return Math.acos(Math.max(-1,Math.min(1,(u.x*v.x+u.y*v.y)/Math.hypot(u.x,u.y)/Math.hypot(v.x,v.y))))*R2D};
+  const foot=medA(F.map(f=>dist(P(f,'he'),P(f,'to'))));
+  const m=reps.map(i=>{const f=F[i],sh=P(f,'sh'),hp=P(f,'hip'),kn=P(f,'kn'),an=P(f,'an'),he=P(f,'he'),to=P(f,'to');
+    const mid={x:(he.x+to.x)/2};
+    return {i,t:f.t,torso:lean(hp,sh),shin:lean(an,kn),knee:ang(kn,an,hp),hip:ang(hp,kn,sh),
+      depth:(hp.y-kn.y)/thigh, bar:dir*(sh.x-mid.x)/foot};
+  });
+  const pick=k=>medA(m.map(x=>x[k]));
+  const R={reps:m.length,ratio,torso:pick('torso'),shin:pick('shin'),knee:pick('knee'),hip:pick('hip'),depth:pick('depth'),bar:pick('bar'),
+    side:Lv>=Rv?'左':'右',F,P,dir};
+  // 代表のしゃがみ＝前傾が中央値に一番近い回
+  let rep=m[0]; for(const x of m) if(Math.abs(x.torso-R.torso)<Math.abs(rep.torso-R.torso)) rep=x;
+  R.repT=rep.t;
+  return R;
+}
+
+function drawSkel(t){
+  if(!VA||!VA.F) {cv.getContext('2d').clearRect(0,0,cv.width,cv.height);return}
+  const ctx=cv.getContext('2d'), F=VA.F;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  let lo=0,hi=F.length-1; while(lo<hi){const mi=(lo+hi)>>1; if(F[mi].t<t) lo=mi+1; else hi=mi}
+  const f=F[lo]; if(!f||Math.abs(f.t-t)>0.2) return;
+  const W=cv.width,H=cv.height,lw=Math.max(3,W/180);
+  const E=[[11,12],[11,23],[12,24],[23,24],[11,13],[13,15],[12,14],[14,16],[23,25],[25,27],[24,26],[26,28],[27,29],[29,31],[27,31],[28,30],[30,32],[28,32]];
+  ctx.lineCap='round';
+  ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=lw;
+  for(const [a,b] of E){ctx.beginPath();ctx.moveTo(f.p[a][0]*W,f.p[a][1]*H);ctx.lineTo(f.p[b][0]*W,f.p[b][1]*H);ctx.stroke()}
+  const P=k=>VA.P(f,k);
+  const seg=(a,b,c)=>{ctx.strokeStyle=c;ctx.lineWidth=lw*2;ctx.beginPath();ctx.moveTo(P(a).x,P(a).y);ctx.lineTo(P(b).x,P(b).y);ctx.stroke()};
+  seg('hip','sh','#e0603a'); seg('hip','kn','#2f7de1'); seg('kn','an','#2a9d6f');
+  // 足の真ん中の縦線
+  const mx=(P('he').x+P('to').x)/2;
+  ctx.setLineDash([lw*2,lw*2]); ctx.strokeStyle='rgba(42,157,111,.9)'; ctx.lineWidth=lw*.7;
+  ctx.beginPath(); ctx.moveTo(mx,0); ctx.lineTo(mx,H); ctx.stroke(); ctx.setLineDash([]);
+}
+function skelLoop(){
+  if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
+    const cb=(n,meta)=>{drawSkel(meta.mediaTime); if(!vid.paused&&!vid.ended) vid.requestVideoFrameCallback(cb)};
+    vid.requestVideoFrameCallback(cb);
+  }else{
+    const tick=()=>{drawSkel(vid.currentTime); if(!vid.paused&&!vid.ended) requestAnimationFrame(tick)}; tick();
+  }
+}
+vid.addEventListener('play',skelLoop);
+vid.addEventListener('seeked',()=>drawSkel(vid.currentTime));
+document.getElementById('vidPlay').onclick=()=>{ if(vid.paused){ if(vid.ended) vid.currentTime=0; vid.play(); } else vid.pause(); };
+vid.addEventListener('play',()=>document.getElementById('vidPlay').textContent='⏸ 止める');
+vid.addEventListener('pause',()=>document.getElementById('vidPlay').textContent='▶ 骨格つきで再生');
+document.getElementById('vidBottom').onclick=async()=>{ if(!VA||VA.err) return; vid.pause(); await seekTo(VA.repT); drawSkel(VA.repT); };
+
+function showResult(R){
+  const out=document.getElementById('vidRes');
+  if(R.err){out.innerHTML=`<div class="res">${R.err}</div>`;return}
+  const anim=pose(1);
+  const f0=x=>Math.round(x)+'°';
+  const depthTxt=R.depth>0.05?'太ももが平行より深い':R.depth>-0.05?'ほぼ平行':'平行より浅い';
+  const barTxt=Math.abs(R.bar)<0.15?'足の真ん中の上（ほぼ理想）':R.bar>0?`足の真ん中より前（足の長さの${Math.round(R.bar*10)}割）`:`足の真ん中より後ろ（足の長さの${Math.round(-R.bar*10)}割）`;
+  const lbl={high:'ハイバー',low:'ローバー',narrow:'ナロー',wide:'ワイド'};
+  out.innerHTML=`
+  <div class="res"><b>読み取れたしゃがみ：${R.reps}回</b>（${R.side}側から撮影と判定）。数字は各回の中央の値。</div>
+  <table class="vt">
+    <tr><th>項目（いちばん下で）</th><th style="text-align:right">あなた</th><th style="text-align:right">アニメ（${lbl[S.bar]}×${lbl[S.stance]}）</th></tr>
+    <tr><td>上半身の前傾</td><td class="n">${f0(R.torso)}</td><td class="n">${f0(anim.a*R2D)}</td></tr>
+    <tr><td>すねの前傾</td><td class="n">${f0(R.shin)}</td><td class="n">${f0(anim.s*R2D)}</td></tr>
+    <tr><td>膝の角度</td><td class="n">${f0(R.knee)}</td><td class="n">${f0(anim.kneeAng)}</td></tr>
+    <tr><td>股関節の角度</td><td class="n">${f0(R.hip)}</td><td class="n">${f0(anim.hipAng)}</td></tr>
+    <tr><td>深さ</td><td class="n" colspan="2">${depthTxt}</td></tr>
+    <tr><td>肩（≒バー）の位置</td><td class="n" colspan="2">${barTxt}</td></tr>
+  </table>
+  <div class="res" style="margin-top:10px">立っているところから測った <b>太もも÷胴＝${R.ratio.toFixed(2)}</b> → <b>${ratioKind(R.ratio)}</b><br>
+  <span class="note">骨格の読み取りの「股関節」「肩」の点は、手で測る骨の出っぱりと少しずれるので目安（±0.05くらいの誤差を見込む）。手で測った値があればそちらを優先。</span><br>
+  <button class="play" id="vidApply">この骨格でアニメを動かす</button></div>
+  <div class="note">アニメの数字は棒人間での計算なので、ぴったり合わなくて当然。比べるのは「前傾が大きい／小さい」などの向き。担ぎ方・足幅を切り替えると右の列が変わる。</div>`;
+  document.getElementById('vidApply').onclick=()=>applyRatio(R.ratio);
+}
+
+document.getElementById('vidFile').addEventListener('change',async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  VA=null; document.getElementById('vidRes').innerHTML='';
+  document.getElementById('vidCtl').hidden=true;
+  vid.src=URL.createObjectURL(file);
+  document.getElementById('vidWrap').hidden=false;
+  try{
+    vst.textContent='動画を読み込み中…';
+    await new Promise((res,rej)=>{if(vid.readyState>=1)res();else{vid.onloadedmetadata=res;vid.onerror=()=>rej(new Error('この動画は開けませんでした'))}});
+    cv.width=vid.videoWidth; cv.height=vid.videoHeight;
+    vst.textContent='骨格の読み取りの準備中…（初回は数十秒かかることがあります）';
+    const lm=await getLM();
+    vst.textContent='読み取り中… 0%';
+    VF=await scan(lm,p=>{vst.textContent=`読み取り中… ${Math.min(100,Math.round(p*100))}%（画面を開いたままにしてください）`});
+    VA=analyzeFrames(VF,vid.videoWidth,vid.videoHeight);
+    vst.textContent=VA.err?'読み取りはできましたが、うまく測れませんでした':'できました';
+    showResult(VA);
+    if(!VA.err){document.getElementById('vidCtl').hidden=false; await seekTo(VA.repT); drawSkel(VA.repT);}
+  }catch(err){console.error(err); vst.textContent='エラー：'+(err.message||err);}
+});
+
+cards(); update(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
