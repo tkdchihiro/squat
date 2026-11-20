@@ -411,22 +411,30 @@ const vid=document.getElementById('vid'), cv=document.getElementById('vidCv'), v
 const medA=a=>{const b=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!b.length)return NaN;const m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
 const pctA=(a,q)=>{const b=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!b.length)return NaN;return b[Math.min(b.length-1,Math.max(0,Math.round(q*(b.length-1))))]};
 const waitEv=(el,ev)=>new Promise(r=>el.addEventListener(ev,r,{once:true}));
-async function seekTo(t){if(Math.abs(vid.currentTime-t)<1e-4)return;const p=waitEv(vid,'seeked');vid.currentTime=t;await p}
-let VF=[], VA=null;
+// 時間切れつきで待つ（動画によっては合図が来ず、ずっと止まったままになるため）
+const within=(p,ms,msg)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(msg)),ms))]);
+async function seekTo(t){if(Math.abs(vid.currentTime-t)<1e-4)return;const p=waitEv(vid,'seeked');vid.currentTime=t;await within(p,8000,'動画のコマ送りができませんでした（別の動画で試してください）')}
+let VF=[], VA=null, vidURL=null;
 
 async function scan(lm,onP){
   const frames=[], dur=vid.duration;
+  if(!Number.isFinite(dur)||dur<=0) throw new Error('動画の長さが分からないため読み取れません（撮り直すか、別の動画で試してください）');
   const grab=(t,step)=>{const r=lm.detectForVideo(vid,nextTs(step));const L=r.landmarks&&r.landmarks[0];frames.push({t,p:L?L.map(q=>[q.x,q.y,q.visibility??1]):null})};
   await seekTo(0);
   lm.detectForVideo(vid,nextTs(33));   // 準備運転（1回目は遅いので、再生前に済ませる）
   if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
     vid.playbackRate=0.5;
     await new Promise(res=>{
-      let last=-1;
-      const cb=(now,meta)=>{const t=meta.mediaTime;if(t>last){grab(t,last<0?33:(t-last)*1000);last=t;onP(t/dur)}if(!vid.ended)vid.requestVideoFrameCallback(cb)};
-      vid.requestVideoFrameCallback(cb); vid.onended=res; vid.play();
+      let last=-1, moved=performance.now(), fin=false;
+      const end=()=>{ if(fin) return; fin=true; clearInterval(guard); res(); };
+      const cb=(now,meta)=>{if(fin)return;const t=meta.mediaTime;if(t>last){grab(t,last<0?33:(t-last)*1000);last=t;moved=performance.now();onP(t/dur)}if(!vid.ended)vid.requestVideoFrameCallback(cb)};
+      // 再生が進まないまま5秒たったら打ち切り、下の「1コマずつ調べる」方式に切り替える
+      const guard=setInterval(()=>{ if(performance.now()-moved>5000) end(); },1000);
+      vid.requestVideoFrameCallback(cb); vid.onended=end;
+      const pp=vid.play();
+      if(pp&&pp.catch) pp.catch(err=>{ console.warn('再生できない→コマ送りで読む',err); vst.textContent='再生できなかったので、1コマずつ読み取ります…'; end(); });
     });
-    vid.onended=null; vid.playbackRate=1;
+    vid.onended=null; vid.pause(); vid.playbackRate=1;
   }
   if(frames.length<dur*8){            // コマを取りこぼした（遅い端末・古いブラウザ）→ 1/15秒ずつ止めて調べる
     frames.length=0;
@@ -502,7 +510,7 @@ function skelLoop(){
 }
 vid.addEventListener('play',skelLoop);
 vid.addEventListener('seeked',()=>drawSkel(vid.currentTime));
-document.getElementById('vidPlay').onclick=()=>{ if(vid.paused){ if(vid.ended) vid.currentTime=0; vid.play(); } else vid.pause(); };
+document.getElementById('vidPlay').onclick=()=>{ if(vid.paused){ if(vid.ended) vid.currentTime=0; const pp=vid.play(); if(pp&&pp.catch) pp.catch(err=>{ vst.textContent='再生できませんでした：'+(err.message||err); }); } else vid.pause(); };
 vid.addEventListener('play',()=>document.getElementById('vidPlay').textContent='⏸ 止める');
 vid.addEventListener('pause',()=>document.getElementById('vidPlay').textContent='▶ 骨格つきで再生');
 document.getElementById('vidBottom').onclick=async()=>{ if(!VA||VA.err) return; vid.pause(); await seekTo(VA.repT); drawSkel(VA.repT); };
@@ -534,14 +542,16 @@ function showResult(R){
 }
 
 document.getElementById('vidFile').addEventListener('change',async e=>{
-  const file=e.target.files[0]; if(!file) return;
+  const file=e.target.files[0]; e.target.value=''; // 同じ動画をもう一度選んでも読み直せるように
+  if(!file) return;
   VA=null; document.getElementById('vidRes').innerHTML='';
   document.getElementById('vidCtl').hidden=true;
-  vid.src=URL.createObjectURL(file);
+  if(vidURL) URL.revokeObjectURL(vidURL); // 前の動画のメモリを手放す
+  vidURL=URL.createObjectURL(file); vid.src=vidURL;
   document.getElementById('vidWrap').hidden=false;
   try{
     vst.textContent='動画を読み込み中…';
-    await new Promise((res,rej)=>{if(vid.readyState>=1)res();else{vid.onloadedmetadata=res;vid.onerror=()=>rej(new Error('この動画は開けませんでした'))}});
+    await within(new Promise((res,rej)=>{if(vid.readyState>=1)res();else{vid.onloadedmetadata=res;vid.onerror=()=>rej(new Error('この動画は開けませんでした'))}}),20000,'動画を読み込めませんでした');
     cv.width=vid.videoWidth; cv.height=vid.videoHeight;
     vst.textContent='骨格の読み取りの準備中…（初回は数十秒かかることがあります）';
     const lm=await getLM();
